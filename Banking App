@@ -1,14 +1,40 @@
+import mysql.connector
+
 class User:
   #Account Management
-  def __init__(self, name, password):
+  def __init__(self, name, password, balance):
     self.name = name
     self.password = password
-    self.balance = 0
+    self.balance = balance
+  
+  def insert(self):
+    connection = mysql.connector.connect(user = "root", database = "bank", password = "Mero2008")
+    cursor = connection.cursor(buffered=True)
+    query = ("insert into Users values (%s, %s, %s)")
+    val = (self.name, self.password, self.balance)
+    cursor.execute(query, val)
+    connection.commit()
+    cursor.clear_attributes()
+    connection.close()
+
+
+  def save(self):
+    connection = mysql.connector.connect(user = "root", database = "bank", password = "Mero2008")
+    cursor = connection.cursor(buffered=True)
+    query = ("update Users set balance = %s where username = %s")
+    val = (self.balance, self.name)
+    cursor.execute(query, val)
+    connection.commit()
+    cursor.close()
+    connection.close()
+   
   #Deposit Money
   def deposit(self, amount):
     self.balance += amount
+    self.save()
     print(f"Deposited: ${amount}")
     print(f"Current Balance: ${self.balance}")
+
   #Withdraw Money
   def withdraw(self, amount):
     if amount <= self.balance:
@@ -17,6 +43,8 @@ class User:
       print(f"Current Balance: ${self.balance}")
     else:
       print("Insufficient balance")
+    self.save()
+
   #Balance Check
   def check_balance(self):
     print(f"Current Balance: ${self.balance}")
@@ -25,13 +53,25 @@ class User:
 class Bank:
   def __init__(self):
     self.users = {}
+    self.load_users()
 
+  def load_users(self):
+    connection = mysql.connector.connect(user = "root", database = "bank", password = "Mero2008")
+    cursor = connection.cursor(buffered=True)
+    query = ("select * from Users")
+    cursor.execute(query)
+    for (username, password, balance) in cursor:
+      self.users[username] = User(username, password, balance)
+      cursor.close()
+      connection.close()
+      
   def sign_up(self, name, password):
     if name in self.users:
       print("Username already exists. Please choose a different username.")
     else:
-      user = User(name, password)
+      user = User(name, password, 0)
       self.users[name] = user
+      user.insert()
       print("Sign up successful. You can now log in.")
 
   def log_in(self, name, password):

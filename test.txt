@@ -1,0 +1,12 @@
+insert Users into (username = %s where password = %s balance = %s)
+insert into Users values ("belal", "222", 70);
+insert into Users values (username "belal", password "222", balance 70)
+
+insert into Users values (username %s, password %s, balance %s)
+insert into Users values (username = %s where password = %s balance = %s)
+
+update Users set balance = 90 where username = "amr"
+
+insert into Users values ("omar", "123", 0);
+update Users set balance = 5 where username = "omar"
+update Users set balance = 90 where username = "amr"
